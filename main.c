@@ -1,4 +1,3 @@
-#include "SDL_surface.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 
@@ -10,8 +9,6 @@
 
 #define SCREEN_WIDTH_PX 400
 #define SCREEN_HEIGHT_PX 600
-#define SCREEN_WIDTH 3
-#define SCREEN_HEIGHT 3
 
 #define RED 255, 0, 0
 #define BLUE 0, 0, 255
@@ -44,18 +41,55 @@ void rerender_background(SDL_Renderer* renderer, uint8_t r, uint8_t g, uint8_t b
     SDL_RenderClear(renderer);
 }
 
-void render_particle(SDL_Renderer* renderer, Particle* particle) {
+enum WallCollision {
+    Left,
+    Right,
+    Top,
+    Bottom,
+    None,
+};
+
+enum WallCollision to_collide(Particle* ptcl) {
+    float nx = ptcl->velocity.x * TS + ptcl->position.x;
+    float ny = ptcl->velocity.y * TS + ptcl->position.y;
+
+    if (nx > SCREEN_WIDTH_PX) return Right;
+    else if (ny > SCREEN_HEIGHT_PX) return Bottom;
+    else if (nx < 0) return Left;
+    else if (ny < 0) return Top;
+    else return None;
+}
+
+void render_particle(SDL_Renderer* renderer, Particle* ptcl) {
     SDL_SetRenderDrawColor(renderer, RED, 255);
 
     // could just take in SDL_Rect instead of
     // taking up more memory...
 
-    particle->position.x += particle->velocity.x * TS;
-    particle->position.y += particle->velocity.y * TS;
+    ptcl->position.x += ptcl->velocity.x * TS;
+    ptcl->position.y += ptcl->velocity.y * TS;
+
+    enum WallCollision c = to_collide(ptcl);
+
+    if (c != -1) {
+        switch (c) {
+        case None:
+            break;
+        case Left:
+        case Right: {
+            ptcl->velocity.x *= -1;
+            break;
+        }
+        case Top:
+        case Bottom: {
+            ptcl->velocity.y *= -1;
+        }
+        }
+    }
 
     SDL_Rect rect = {
-        .x = (int)(particle->position.x - (PARTICLE_SIZE / 2.0)),
-        .y = (int)(particle->position.y - (PARTICLE_SIZE / 2.0)),
+        .x = (int)(ptcl->position.x - (PARTICLE_SIZE / 2.0)),
+        .y = (int)(ptcl->position.y - (PARTICLE_SIZE / 2.0)),
         .h = (int)(PARTICLE_SIZE),
         .w = (int)(PARTICLE_SIZE),
     };
@@ -74,7 +108,7 @@ int main() {
 
     SDL_Window* window;
     SDL_Renderer* renderer;
-    window = SDL_CreateWindow("Tic Tac Toe", 0, 0, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX, SDL_WINDOW_HIDDEN);
+    window = SDL_CreateWindow("Particles", 0, 0, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX, SDL_WINDOW_HIDDEN);
     if (!window) {
         fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
         SDL_Quit();
