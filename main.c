@@ -1,3 +1,4 @@
+#include "SDL_surface.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 
@@ -20,12 +21,15 @@
 // number of particles
 #define N 100
 
+#define PARTICLE_SIZE 10.f
+
 // time step
 #define TS 0.5f
 
 typedef struct {
     float x, y;
 } Position;
+
 typedef struct {
     float x, y;
 } Velocity;
@@ -49,7 +53,15 @@ void render_particle(SDL_Renderer* renderer, Particle* particle) {
     particle->position.x += particle->velocity.x * TS;
     particle->position.y += particle->velocity.y * TS;
 
-    SDL_RenderDrawPoint(renderer, (int)particle->position.x, (int)particle->position.y);
+    SDL_Rect rect = {
+        .x = (int)(particle->position.x - (PARTICLE_SIZE / 2.0)),
+        .y = (int)(particle->position.y - (PARTICLE_SIZE / 2.0)),
+        .h = (int)(PARTICLE_SIZE),
+        .w = (int)(PARTICLE_SIZE),
+    };
+
+    SDL_RenderFillRect(renderer, &rect);
+    // SDL_RenderDrawPoint(renderer, (int)particle->position.x, (int)particle->position.y);
 }
 
 int main() {
@@ -70,7 +82,7 @@ int main() {
     }
     SDL_ShowWindow(window);
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
@@ -78,6 +90,7 @@ int main() {
         return 1;
     }
 
+    SDL_Event event;
     int running = 1;
     int init = 1;
     int mouse_x, mouse_y;
@@ -92,6 +105,13 @@ int main() {
     }
 
     while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = 0;
+            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                SDL_GetMouseState(&mouse_x, &mouse_y);
+            }
+        }
         // redraw background for next frame
         SDL_SetRenderDrawColor(renderer, WHITE, 255);
         SDL_RenderClear(renderer);
