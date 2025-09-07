@@ -1,0 +1,25 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+PointerAlignment: Left
+
+# disable bin-packing so params are split rather than packed
+BinPackParameters: false
+BinPackArguments: false
+ExperimentalAutoDetectBinPacking: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# force the bracket-breaking style that places the closing ')' on its own line
+AlignAfterOpenBracket: BlockIndent
+
+# make clang-format more likely to put the first parameter on its own line
+PenaltyBreakBeforeFirstCallParameter: 100
+
+# optional — set a column limit you want (0 = no limit)
+ColumnLimit: 120
+
+# keep your short-statement preferences
+AllowShortBlocksOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+BraceWrapping:
+  AfterControlStatement: Never
