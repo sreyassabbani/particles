@@ -1,11 +1,12 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include "utils.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #define SCREEN_WIDTH_PX 400
 #define SCREEN_HEIGHT_PX 600
@@ -53,10 +54,10 @@ enum WallCollision to_collide(Particle* ptcl) {
     float nx = ptcl->velocity.x * TS + ptcl->position.x;
     float ny = ptcl->velocity.y * TS + ptcl->position.y;
 
-    if (nx > SCREEN_WIDTH_PX) return Right;
-    else if (ny > SCREEN_HEIGHT_PX) return Bottom;
-    else if (nx < 0) return Left;
-    else if (ny < 0) return Top;
+    if (nx > SCREEN_WIDTH_PX - PARTICLE_SIZE / 2) return Right;
+    else if (ny > SCREEN_HEIGHT_PX - PARTICLE_SIZE / 2) return Bottom;
+    else if (nx < PARTICLE_SIZE / 2) return Left;
+    else if (ny < PARTICLE_SIZE / 2) return Top;
     else return None;
 }
 
@@ -71,20 +72,18 @@ void render_particle(SDL_Renderer* renderer, Particle* ptcl) {
 
     enum WallCollision c = to_collide(ptcl);
 
-    if (c != -1) {
-        switch (c) {
-        case None:
-            break;
-        case Left:
-        case Right: {
-            ptcl->velocity.x *= -1;
-            break;
-        }
-        case Top:
-        case Bottom: {
-            ptcl->velocity.y *= -1;
-        }
-        }
+    switch (c) {
+    case None:
+        break;
+    case Left:
+    case Right: {
+        ptcl->velocity.x *= -1;
+        break;
+    }
+    case Top:
+    case Bottom: {
+        ptcl->velocity.y *= -1;
+    }
     }
 
     SDL_Rect rect = {
@@ -99,6 +98,8 @@ void render_particle(SDL_Renderer* renderer, Particle* ptcl) {
 }
 
 int main() {
+    rng_seed(1234);
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
         return 1;
@@ -132,9 +133,8 @@ int main() {
     for (int i = 0; i < N; ++i) {
         list[i].position.x = (float)(rand() % SCREEN_WIDTH_PX);
         list[i].position.y = (float)(rand() % SCREEN_HEIGHT_PX);
-        list[i].velocity.x = (float)((rand() % 7) - 3); // range -3..3
-        list[i].velocity.y = (float)((rand() % 7) - 3);
-        list[i].velocity.x = (float)arc4random() / (float)UINT32_MAX;
+        list[i].velocity.x = randf_range(-30.f, 30.f);
+        list[i].velocity.y = randf_range(-30.f, 30.f);
     }
 
     while (running) {
