@@ -1,12 +1,11 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include "utils.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define SCREEN_WIDTH_PX 400
 #define SCREEN_HEIGHT_PX 600
@@ -133,8 +132,9 @@ int main() {
     for (int i = 0; i < N; ++i) {
         list[i].position.x = (float)(rand() % SCREEN_WIDTH_PX);
         list[i].position.y = (float)(rand() % SCREEN_HEIGHT_PX);
-        list[i].velocity.x = randf_range(4.f, 30.f);
-        list[i].velocity.y = randf_range(4.f, 30.f);
+        list[i].velocity.x = (float)((rand() % 7) - 3); // range -3..3
+        list[i].velocity.y = (float)((rand() % 7) - 3);
+        list[i].velocity.x = (float)arc4random() / (float)UINT32_MAX;
     }
 
     while (running) {

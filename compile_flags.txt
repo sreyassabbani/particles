@@ -1,4 +1,5 @@
 -I/opt/homebrew/include/SDL2
 -D_THREAD_SAFE
 -L/opt/homebrew/lib
+-Iinclude
 -lSDL2

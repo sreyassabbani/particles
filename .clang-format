@@ -20,6 +20,7 @@ ColumnLimit: 120
 # keep your short-statement preferences
 AllowShortBlocksOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 BraceWrapping:
   AfterControlStatement: Never
